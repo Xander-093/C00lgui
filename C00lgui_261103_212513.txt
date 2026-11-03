@@ -1,0 +1,410 @@
+-- ==========================================
+-- C00LKIDD HUB - MEGA ULTIMATE EDITION
+-- ==========================================
+local Players = game:GetService("Players")
+local Lighting = game:GetService("Lighting")
+local SoundService = game:GetService("SoundService")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local TeleportService = game:GetService("TeleportService")
+local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+
+-- Bersihkan GUI lama
+if PlayerGui:FindFirstChild("C00lMegaHub") then PlayerGui.C00lMegaHub:Destroy() end
+if PlayerGui:FindFirstChild("C00lMegaIcon") then PlayerGui.C00lMegaIcon:Destroy() end
+
+-- Musik Latar Belakang (Spooky / Hacker Vibe)
+pcall(function()
+local bgm = Instance.new("Sound", SoundService)
+bgm.SoundId = "rbxassetid://1841603511"
+bgm.Looped = true
+bgm.Volume = 1
+bgm:Play()
+end)
+
+-- Main ScreenGui
+local ScreenGui = Instance.new("ScreenGui", PlayerGui)
+ScreenGui.Name = "C00lMegaHub"
+ScreenGui.ResetOnSpawn = false
+
+-- Tombol Minimize (Icon Bulat)
+local IconGui = Instance.new("ScreenGui", PlayerGui)
+IconGui.Name = "C00lMegaIcon"
+IconGui.ResetOnSpawn = false
+IconGui.Enabled = false
+
+local IconBtn = Instance.new("TextButton", IconGui)
+IconBtn.BackgroundColor3 = Color3.fromRGB(20, 0, 0)
+IconBtn.Position = UDim2.new(0, 20, 0.5, -25)
+IconBtn.Size = UDim2.new(0, 50, 0, 50)
+IconBtn.Font = Enum.Font.GothamBold
+IconBtn.Text = "C00L"
+IconBtn.TextColor3 = Color3.fromRGB(255, 0, 0)
+IconBtn.TextSize = 14
+Instance.new("UICorner", IconBtn).CornerRadius = UDim.new(1, 0)
+local iStroke = Instance.new("UIStroke", IconBtn)
+iStroke.Color = Color3.fromRGB(255, 0, 0)
+iStroke.Thickness = 2
+
+-- Window Utama
+local Main = Instance.new("Frame", ScreenGui)
+Main.BackgroundColor3 = Color3.fromRGB(15, 0, 0)
+Main.Position = UDim2.new(0.5, -230, 0.5, -160)
+Main.Size = UDim2.new(0, 460, 0, 320)
+Main.ClipsDescendants = true
+Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 8)
+local mStroke = Instance.new("UIStroke", Main)
+mStroke.Color = Color3.fromRGB(255, 0, 0)
+mStroke.Thickness = 1.5
+
+-- TopBar
+local TopBar = Instance.new("Frame", Main)
+TopBar.BackgroundColor3 = Color3.fromRGB(25, 0, 0)
+TopBar.Size = UDim2.new(1, 0, 0, 32)
+
+local Title = Instance.new("TextLabel", TopBar)
+Title.BackgroundTransparency = 1
+Title.Position = UDim2.new(0, 10, 0, 0)
+Title.Size = UDim2.new(1, -40, 1, 0)
+Title.Font = Enum.Font.GothamBold
+Title.Text = "C00LKIDD HUB <font color='#FF0000'>MEGA</font>"
+Title.RichText = true
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextSize = 13
+Title.TextXAlignment = Enum.TextXAlignment.Left
+
+local CloseBtn = Instance.new("TextButton", TopBar)
+CloseBtn.BackgroundTransparency = 1
+CloseBtn.Position = UDim2.new(1, -32, 0, 0)
+CloseBtn.Size = UDim2.new(0, 32, 1, 0)
+CloseBtn.Font = Enum.Font.GothamBold
+CloseBtn.Text = "-"
+CloseBtn.TextColor3 = Color3.fromRGB(255, 100, 100)
+CloseBtn.TextSize = 18
+
+CloseBtn.MouseButton1Click:Connect(function()
+ScreenGui.Enabled = false
+IconGui.Enabled = true
+end)
+
+IconBtn.MouseButton1Click:Connect(function()
+ScreenGui.Enabled = true
+IconGui.Enabled = false
+end)
+
+-- Dragging Mobile Support
+local dragging, dragStart, startPos
+TopBar.InputBegan:Connect(function(input)
+if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+dragging = true
+dragStart = input.Position
+startPos = Main.Position
+end
+end)
+UserInputService.InputChanged:Connect(function(input)
+if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+local delta = input.Position - dragStart
+Main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+end
+end)
+UserInputService.InputEnded:Connect(function(input)
+if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+dragging = false
+end
+end)
+
+-- Sidebar untuk Kategori / Tab
+local Sidebar = Instance.new("Frame", Main)
+Sidebar.BackgroundColor3 = Color3.fromRGB(20, 0, 0)
+Sidebar.Position = UDim2.new(0, 0, 0, 32)
+Sidebar.Size = UDim2.new(0, 110, 1, -32)
+
+local SidebarLayout = Instance.new("UIListLayout", Sidebar)
+SidebarLayout.SortOrder = Enum.SortOrder.LayoutOrder
+SidebarLayout.Padding = UDim.new(0, 3)
+
+-- Container Halaman Menu
+local Container = Instance.new("Frame", Main)
+Container.BackgroundTransparency = 1
+Container.Position = UDim2.new(0, 115, 0, 38)
+Container.Size = UDim2.new(1, -120, 1, -44)
+
+local Library = {}
+local currentTab = nil
+
+function Library:CreateTab(name)
+local TabBtn = Instance.new("TextButton", Sidebar)
+TabBtn.BackgroundColor3 = Color3.fromRGB(30, 0, 0)
+TabBtn.BackgroundTransparency = 1
+TabBtn.Size = UDim2.new(1, 0, 0, 30)
+TabBtn.Font = Enum.Font.GothamSemibold
+TabBtn.Text = name
+TabBtn.TextColor3 = Color3.fromRGB(180, 100, 100)
+TabBtn.TextSize = 11
+
+local Page = Instance.new("ScrollingFrame", Container)
+Page.BackgroundTransparency = 1
+Page.Size = UDim2.new(1, 0, 1, 0)
+Page.Visible = false
+Page.CanvasSize = UDim2.new(0, 0, 0, 450)
+Page.ScrollBarThickness = 3
+Page.ScrollBarImageColor3 = Color3.fromRGB(255, 0, 0)
+
+local PageLayout = Instance.new("UIListLayout", Page)
+PageLayout.SortOrder = Enum.SortOrder.LayoutOrder
+PageLayout.Padding = UDim.new(0, 6)
+
+TabBtn.MouseButton1Click:Connect(function()
+for _, v in pairs(Container:GetChildren()) do if v:IsA("ScrollingFrame") then v.Visible = false end end
+for _, v in pairs(Sidebar:GetChildren()) do if v:IsA("TextButton") then v.TextColor3 = Color3.fromRGB(180, 100, 100) end end
+Page.Visible = true
+TabBtn.TextColor3 = Color3.fromRGB(255, 0, 0)
+end)
+
+if currentTab == nil then
+currentTab = Page
+Page.Visible = true
+TabBtn.TextColor3 = Color3.fromRGB(255, 0, 0)
+end
+
+local Elements = {}
+
+function Elements:AddButton(text, callback)
+local b = Instance.new("TextButton", Page)
+b.BackgroundColor3 = Color3.fromRGB(35, 10, 10)
+b.Size = UDim2.new(1, -6, 0, 30)
+b.Font = Enum.Font.Gotham
+b.Text = text
+b.TextColor3 = Color3.fromRGB(240, 200, 200)
+b.TextSize = 11
+Instance.new("UICorner", b).CornerRadius = UDim.new(0, 6)
+b.MouseButton1Click:Connect(callback or function() end)
+end
+
+function Elements:AddToggle(text, default, callback)
+local toggled = default or false
+local tf = Instance.new("Frame", Page)
+tf.BackgroundColor3 = Color3.fromRGB(35, 10, 10)
+tf.Size = UDim2.new(1, -6, 0, 30)
+Instance.new("UICorner", tf).CornerRadius = UDim.new(0, 6)
+
+local tt = Instance.new("TextLabel", tf)
+tt.BackgroundTransparency = 1
+tt.Position = UDim2.new(0, 10, 0, 0)
+tt.Size = UDim2.new(1, -45, 1, 0)
+tt.Font = Enum.Font.Gotham
+tt.Text = text
+tt.TextColor3 = Color3.fromRGB(240, 200, 200)
+tt.TextSize = 11
+tt.TextXAlignment = Enum.TextXAlignment.Left
+
+local ind = Instance.new("Frame", tf)
+ind.Position = UDim2.new(1, -28, 0.5, -7)
+ind.Size = UDim2.new(0, 14, 0, 14)
+ind.BackgroundColor3 = toggled and Color3.fromRGB(255, 0, 0) or Color3.fromRGB(60, 20, 20)
+Instance.new("UICorner", ind).CornerRadius = UDim.new(0, 4)
+
+local btn = Instance.new("TextButton", tf)
+btn.BackgroundTransparency = 1
+btn.Size = UDim2.new(1, 0, 1, 0)
+btn.Text = ""
+
+btn.MouseButton1Click:Connect(function()
+toggled = not toggled
+ind.BackgroundColor3 = toggled and Color3.fromRGB(255, 0, 0) or Color3.fromRGB(60, 20, 20)
+if callback then callback(toggled) end
+end)
+end
+
+return Elements
+end
+
+-- ==========================================
+-- MEMBUAT SEMUA TAB & FITUR MEGA
+-- ==========================================
+local Troll = Library:CreateTab("Troll")
+local Player = Library:CreateTab("Player")
+local Visual = Library:CreateTab("Visual")
+local Tools = Library:CreateTab("Tools")
+local Misc = Library:CreateTab("Misc")
+
+-- 1. TAB TROLL
+Troll:AddButton("🌪️ Spam Decal c00lkidd", function()
+for _, v in pairs(workspace:GetDescendants()) do
+if v:IsA("BasePart") and not v:IsA("Terrain") then
+for _, face in pairs(Enum.NormalId:GetEnumItems()) do
+pcall(function()
+local d = Instance.new("Decal", v)
+d.Texture = "rbxassetid://10972903265"
+d.Face = face
+end)
+end
+end
+end
+end)
+
+Troll:AddButton("🌌 Skybox Dark Red", function()
+for _, v in pairs(Lighting:GetChildren()) do if v:IsA("Sky") then v:Destroy() end end
+local s = Instance.new("Sky", Lighting)
+s.SkyboxBk, s.SkyboxDn, s.SkyboxFt = "rbxassetid://159495446", "rbxassetid://159495446", "rbxassetid://159495446"
+s.SkyboxLf, s.SkyboxRt, s.SkyboxUp = "rbxassetid://159495446", "rbxassetid://159495446", "rbxassetid://159495446"
+Lighting.ClockTime, Lighting.Ambient = 0, Color3.fromRGB(50, 0, 0)
+end)
+
+Troll:AddButton("💥 Explosion Spam (Area)", function()
+pcall(function()
+local p = LocalPlayer.Character.HumanoidRootPart.Position
+for i = 1, 10 do
+local exp = Instance.new("Explosion", workspace)
+exp.Position = p + Vector3.new(math.random(-20,20), 0, math.random(-20,20))
+exp.BlastRadius = 15
+end
+end)
+end)
+
+-- 2. TAB PLAYER
+Player:AddButton("⚡ Speed Boost (50)", function()
+if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+LocalPlayer.Character.Humanoid.WalkSpeed = 50
+end
+end)
+
+Player:AddButton("🏃 Reset Speed (16)", function()
+if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+LocalPlayer.Character.Humanoid.WalkSpeed = 16
+end
+end)
+
+Player:AddButton("🛡️ God Mode (Infinite HP)", function()
+if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+LocalPlayer.Character.Humanoid.MaxHealth = math.huge
+LocalPlayer.Character.Humanoid.Health = math.huge
+end
+end)
+
+local flying = false
+Player:AddToggle("🚀 Fly (Terbang)", false, function(state)
+flying = state
+local char = LocalPlayer.Character
+if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+local root = char.HumanoidRootPart
+if flying then
+local bg = Instance.new("BodyGyro", root)
+bg.Name = "C00lG"
+bg.MaxTorque = Vector3.new(9e9,9e9,9e9)
+bg.CFrame = root.CFrame
+local bv = Instance.new("BodyVelocity", root)
+bv.Name = "C00lV"
+bv.MaxForce = Vector3.new(9e9,9e9,9e9)
+bv.Velocity = Vector3.new(0,0,0)
+task.spawn(function()
+while flying and char and root do
+local cam = workspace.CurrentCamera
+local move = char.Humanoid.MoveDirection
+if move.Magnitude > 0 then
+bv.Velocity = cam.CFrame.LookVector * 50 + Vector3.new(0,2,0)
+else
+bv.Velocity = Vector3.new(0,0.1,0)
+end
+bg.CFrame = cam.CFrame
+task.wait()
+end
+if bg then bg:Destroy() end
+if bv then bv:Destroy() end
+end)
+else
+if root:FindFirstChild("C00lG") then root.C00lG:Destroy() end
+if root:FindFirstChild("C00lV") then root.C00lV:Destroy() end
+end
+end)
+
+local noclipConn
+Player:AddToggle("🪟 NoClip (Tembus Tembok)", false, function(state)
+if state then
+noclipConn = RunService.Stepped:Connect(function()
+if LocalPlayer.Character then
+for _, p in pairs(LocalPlayer.Character:GetDescendants()) do
+if p:IsA("BasePart") then p.CanCollide = false end
+end
+end
+end)
+else
+if noclipConn then noclipConn:Disconnect() end
+if LocalPlayer.Character then
+for _, p in pairs(LocalPlayer.Character:GetDescendants()) do
+if p:IsA("BasePart") then p.CanCollide = true end
+end
+end
+end
+end)
+
+-- 3. TAB VISUAL
+Visual:AddButton("💡 Fullbright (Anti Gelap)", function()
+Lighting.Brightness = 2
+Lighting.ClockTime = 14
+Lighting.GlobalShadows = false
+end)
+
+Visual:AddButton("👁️ Player ESP (Nama Pemain)", function()
+for _, p in pairs(Players:GetPlayers()) do
+if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("Head") then
+if not p.Character.Head:FindFirstChild("C00lESP") then
+local bb = Instance.new("BillboardGui", p.Character.Head)
+bb.Name = "C00lESP"
+bb.AlwaysOnTop = true
+bb.Size = UDim2.new(0, 100, 0, 40)
+bb.StudsOffset = Vector3.new(0, 2.5, 0)
+local txt = Instance.new("TextLabel", bb)
+txt.BackgroundTransparency = 1
+txt.Size = UDim2.new(1,0,1,0)
+txt.Font = Enum.Font.GothamBold
+txt.Text = p.Name
+txt.TextColor3 = Color3.fromRGB(255, 0, 0)
+txt.TextSize = 13
+end
+end
+end
+end)
+
+-- 4. TAB TOOLS
+Tools:AddButton("🔨 Give Btools (Delete Tool)", function()
+local t = Instance.new("Tool", LocalPlayer.Backpack)
+t.Name = "C00l Btools"
+t.RequiresHandle = false
+t.Activated:Connect(function()
+local m = LocalPlayer:GetMouse()
+if m.Target then m.Target:Destroy() end
+end)
+end)
+
+Tools:AddButton("🖱️ Click TP (Teleport ke Kursor)", function()
+local t = Instance.new("Tool", LocalPlayer.Backpack)
+t.Name = "C00l ClickTP"
+t.RequiresHandle = false
+t.Activated:Connect(function()
+local m = LocalPlayer:GetMouse()
+if m.Hit and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+LocalPlayer.Character.HumanoidRootPart.CFrame = m.Hit + Vector3.new(0, 3, 0)
+end
+end)
+end)
+
+-- 5. TAB MISC
+Misc:AddButton("🔄 Rejoin Server", function()
+TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, LocalPlayer)
+end)
+
+Misc:AddButton("🌐 Server Hop (Cari Server Lain)", function()
+local Http = game:GetService("HttpService")
+local TPS = game:GetService("TeleportService")
+local servers = Http:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/"..game.PlaceId.."/servers/Public?sortOrder=Asc&limit=100"))
+for _, s in pairs(servers.data) do
+if s.playing < s.maxPlayers and s.id ~= game.JobId then
+TPS:TeleportToPlaceInstance(game.PlaceId, s.id, LocalPlayer)
+break
+end
+end
+end)
+
+print("C00LKIDD HUB MEGA LOADED!")
