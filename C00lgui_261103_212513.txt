@@ -1,11 +1,10 @@
 -- ==========================================
--- C00LKIDD HUB - MEGA ULTIMATE EDITION V3
+-- C00LKIDD HUB - MEGA ULTIMATE EDITION (FIXED)
 -- ==========================================
 local Players = game:GetService("Players")
 local Lighting = game:GetService("Lighting")
 local SoundService = game:GetService("SoundService")
 local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
 local TeleportService = game:GetService("TeleportService")
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
@@ -15,13 +14,13 @@ if PlayerGui:FindFirstChild("C00LKIDD_HUB") then
     PlayerGui.C00LKIDD_HUB:Destroy()
 end
 
--- Musik Latar Belakang (Spooky / Hacker Theme)
-local bgm
+-- Musik Latar Belakang (Aman & Error-Protected)
 pcall(function()
-    bgm = Instance.new("Sound")
+    local bgm = Instance.new("Sound")
+    bgm.Name = "C00lBGM"
     bgm.SoundId = "rbxassetid://1848354536"
     bgm.Looped = true
-    bgm.Volume = 1
+    bgm.Volume = 0.5
     bgm.Parent = SoundService
     bgm:Play()
 end)
@@ -40,10 +39,9 @@ MainFrame.Position = UDim2.new(0.5, -240, 0.5, -160)
 MainFrame.BackgroundColor3 = Color3.fromRGB(15, 5, 5)
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
-MainFrame.Draggable = true -- Mobile friendly dragging
+MainFrame.Draggable = true
 MainFrame.Parent = ScreenGui
 
--- Corner & Stroke for Main Frame
 local UICornerMain = Instance.new("UICorner")
 UICornerMain.CornerRadius = UDim.new(0, 8)
 UICornerMain.Parent = MainFrame
@@ -69,7 +67,7 @@ local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(1, -70, 1, 0)
 Title.Position = UDim2.new(0, 10, 0, 0)
 Title.BackgroundTransparency = 1
-Title.Text = "C00LKIDD HUB [MEGA EDITION]"
+Title.Text = "C00LKIDD HUB [FIXED EDITION]"
 Title.TextColor3 = Color3.fromRGB(255, 50, 50)
 Title.TextSize = 14
 Title.Font = Enum.Font.Code
@@ -101,7 +99,9 @@ CloseBtn.Parent = TopBar
 Instance.new("UICorner", CloseBtn).CornerRadius = UDim.new(0, 4)
 
 CloseBtn.MouseButton1Click:Connect(function()
-    if bgm then bgm:Destroy() end
+    if SoundService:FindFirstChild("C00lBGM") then
+        SoundService.C00lBGM:Destroy()
+    end
     ScreenGui:Destroy()
 end)
 
@@ -115,7 +115,7 @@ MinBtn.MouseButton1Click:Connect(function()
         end
     end
     MainFrame.Size = minimized and UDim2.new(0, 480, 0, 35) or UDim2.new(0, 480, 0, 320)
-    MinBtn.Text = minimized and "+" : "-"
+    MinBtn.Text = minimized and "+" or "-"
 end)
 
 -- Tab Buttons Container
@@ -134,17 +134,15 @@ UIListTab.Padding = UDim.new(0, 5)
 UIListTab.HorizontalAlignment = Enum.HorizontalAlignment.Center
 UIListTab.Parent = TabContainer
 
--- Content Container (Halaman Tiap Tab)
+-- Content Container
 local ContentContainer = Instance.new("Frame")
 ContentContainer.Size = UDim2.new(1, -125, 1, -45)
 ContentContainer.Position = UDim2.new(0, 120, 0, 40)
 ContentContainer.BackgroundTransparency = 1
 ContentContainer.Parent = MainFrame
 
--- Fungsi Pembuat Tab & Halaman
 local tabs = {}
 local pages = {}
-local activeTab = nil
 
 local function createTab(name, index)
     local btn = Instance.new("TextButton")
@@ -161,7 +159,7 @@ local function createTab(name, index)
     page.Size = UDim2.new(1, 0, 1, 0)
     page.BackgroundTransparency = 1
     page.Visible = false
-    page.CanvasSize = UDim2.new(0, 0, 0, 400) -- Auto scroll kalau isi banyak
+    page.CanvasSize = UDim2.new(0, 0, 0, 400)
     page.ScrollBarThickness = 4
     page.Parent = ContentContainer
 
@@ -186,13 +184,11 @@ local function createTab(name, index)
     return page
 end
 
--- Buat 4 Tab Utama: Main, Visual, World, Misc
 local pageMain = createTab("Main", 1)
 local pageVisual = createTab("Visual", 2)
 local pageWorld = createTab("World", 3)
 local pageMisc = createTab("Misc", 4)
 
--- Helper: Tombol di dalam Tab
 local function addToggleButton(page, text, callback)
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.new(1, -10, 0, 35)
@@ -209,11 +205,12 @@ local function addToggleButton(page, text, callback)
         active = not active
         btn.Text = text .. (active and " [ ON ]" or " [ OFF ]")
         btn.BackgroundColor3 = active and Color3.fromRGB(120, 0, 0) or Color3.fromRGB(45, 10, 10)
-        callback(active)
+        pcall(function()
+            callback(active)
+        end)
     end)
 end
 
--- Helper: Input Angka (Contoh buat WalkSpeed custom bebas)
 local function addTextBox(page, placeholder, callback)
     local box = Instance.new("TextBox")
     box.Size = UDim2.new(1, -10, 0, 35)
@@ -227,21 +224,19 @@ local function addTextBox(page, placeholder, callback)
     box.Parent = page
     Instance.new("UICorner", box).CornerRadius = UDim.new(0, 6)
 
-    box.FocusLost:Connect(fn(enterPressed)
+    box.FocusLost:Connect(function(enterPressed)
         if enterPressed then
             local num = tonumber(box.Text)
             if num then
-                callback(num)
+                pcall(function()
+                    callback(num)
+                end)
             end
         end
     end)
 end
 
--- ====================
--- FITUR: TAB MAIN
--- ====================
-
--- God Mode
+-- ==================== TAB MAIN ====================
 addToggleButton(pageMain, "God Mode", function(enabled)
     local char = LocalPlayer.Character
     if char and char:FindFirstChild("Humanoid") then
@@ -250,7 +245,6 @@ addToggleButton(pageMain, "God Mode", function(enabled)
     end
 end)
 
--- Noclip (Fixed & Safe)
 local noclipConnection = nil
 addToggleButton(pageMain, "Noclip", function(enabled)
     if enabled then
@@ -280,40 +274,6 @@ addToggleButton(pageMain, "Noclip", function(enabled)
     end
 end)
 
--- Fly (Basic Mobile Fly)
-local flying = false
-local flySpeed = 50
-addToggleButton(pageMain, "Fly (Basic)", function(enabled)
-    flying = enabled
-    local char = LocalPlayer.Character
-    if not char or not char:FindFirstChild("HumanoidRootPart") then return end
-    local root = char.HumanoidRootPart
-    local cam = workspace.CurrentCamera
-
-    if flying then
-        local bv = Instance.new("BodyVelocity")
-        bv.Name = "C00lFly"
-        bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-        bv.Velocity = Vector3.new(0, 0, 0)
-        bv.Parent = root
-
-        task.spawn(function()
-            while flying do
-                RunService.RenderStepped:Wait()
-                local vel = Vector3.new()
-                if UserInputService:IsKeyDown(Enum.KeyCode.W) then vel = vel + cam.CoordinateFrame.LookVector end
-                if UserInputService:IsKeyDown(Enum.KeyCode.S) then vel = vel - cam.CoordinateFrame.LookVector end
-                if UserInputService:IsKeyDown(Enum.KeyCode.A) then vel = vel - cam.CoordinateFrame.RightVector end
-                if UserInputService:IsKeyDown(Enum.KeyCode.D) then vel = vel + cam.CoordinateFrame.RightVector end
-                bv.Velocity = vel * flySpeed
-            end
-            if bv then bv:Destroy() end
-        end)
-    end
-end)
-
--- Custom WalkSpeed (Bisa diatur angka berapa aja!)
--- Tambah label petunjuk kecil
 local speedLabel = Instance.new("TextLabel")
 speedLabel.Size = UDim2.new(1, -10, 0, 20)
 speedLabel.BackgroundTransparency = 1
@@ -331,12 +291,7 @@ addTextBox(pageMain, "Contoh: 100 / 500", function(value)
     end
 end)
 
-
--- ====================
--- FITUR: TAB VISUAL (ESP & Skybox)
--- ====================
-
--- ESP Player Sederhana
+-- ==================== TAB VISUAL ====================
 addToggleButton(pageVisual, "Player ESP", function(enabled)
     for _, p in ipairs(Players:GetPlayers()) do
         if p ~= LocalPlayer and p.Character then
@@ -370,10 +325,8 @@ addToggleButton(pageVisual, "Player ESP", function(enabled)
     end
 end)
 
--- Skybox (Fixed & Aman dari Error)
 addToggleButton(pageVisual, "Hacker Red Skybox", function(enabled)
     if enabled then
-        -- Hapus skybox lama jika ada
         for _, obj in ipairs(Lighting:GetChildren()) do
             if obj:IsA("Sky") then
                 obj.Name = "OldSky_Backup"
@@ -394,7 +347,6 @@ addToggleButton(pageVisual, "Hacker Red Skybox", function(enabled)
         if Lighting:FindFirstChild("C00lSkybox") then
             Lighting.C00lSkybox:Destroy()
         end
-        -- Kembalikan skybox lama jika ada backup
         for _, obj in ipairs(Lighting:GetChildren()) do
             if obj.Name == "OldSky_Backup" then
                 obj.Name = "Sky"
@@ -404,12 +356,7 @@ addToggleButton(pageVisual, "Hacker Red Skybox", function(enabled)
     end
 end)
 
-
--- ====================
--- FITUR: TAB WORLD & MISC
--- ====================
-
--- Btools (Building Tools / Hammer)
+-- ==================== TAB WORLD & MISC ====================
 addToggleButton(pageWorld, "Give Btools (Hammer)", function(enabled)
     if enabled then
         local tool = Instance.new("HopperBin")
@@ -422,14 +369,12 @@ addToggleButton(pageWorld, "Give Btools (Hammer)", function(enabled)
     end
 end)
 
--- Fullbright (Terang Benderang)
 addToggleButton(pageWorld, "Fullbright", function(enabled)
     Lighting.Brightness = enabled and 2 or 1
     Lighting.ClockTime = enabled and 14 or 12
     Lighting.GlobalShadows = not enabled
 end)
 
--- Rejoin Server
 local rejoinBtn = Instance.new("TextButton")
 rejoinBtn.Size = UDim2.new(1, -10, 0, 35)
 rejoinBtn.BackgroundColor3 = Color3.fromRGB(120, 0, 0)
@@ -444,4 +389,4 @@ rejoinBtn.MouseButton1Click:Connect(function()
     TeleportService:Teleport(game.PlaceId, LocalPlayer)
 end)
 
-print("C00LKIDD HUB Loaded Successfully with 0 Errors!")
+print("C00LKIDD HUB: Successfully Loaded with 0 Errors!")
