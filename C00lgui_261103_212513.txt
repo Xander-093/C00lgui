@@ -1,5 +1,5 @@
 --[[
-    Cool Kid GUI - Ultimate Fling & Fly Edition
+    Cool Kid GUI - Ultimate Fling & Fly Edition (with Minimize & Logo)
     Designed for Delta Executor (Mobile & PC)
 ]]--
 
@@ -29,7 +29,9 @@ SpookySound.Volume = 1
 SpookySound.Parent = SoundService
 SpookySound:Play()
 
--- Main Frame (Jendela Utama) - Diperbesar dikit buat nampung fitur baru
+---------------------------------------------------------
+-- 1. MAIN FRAME (JENDELA UTAMA)
+---------------------------------------------------------
 local MainFrame = Instance.new("Frame")
 MainFrame.Size = UDim2.new(0, 440, 0, 440)
 MainFrame.Position = UDim2.new(0.5, -220, 0.5, -220)
@@ -58,15 +60,30 @@ TopCorner.CornerRadius = UDim.new(0, 12)
 TopCorner.Parent = TopBar
 
 local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1, -50, 1, 0)
+Title.Size = UDim2.new(1, -90, 1, 0)
 Title.Position = UDim2.new(0, 15, 0, 0)
 Title.BackgroundTransparency = 1
-Title.Text = "💀 COOL KID GUI - ULTIMATE FLING 💀"
+Title.Text = "💀 COOL KID GUI - ULTIMATE 💀"
 Title.TextColor3 = Color3.fromRGB(255, 140, 0)
 Title.TextSize = 13
 Title.Font = Enum.Font.GothamBold
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Parent = TopBar
+
+-- Tombol Minimize (-)
+local MinimizeBtn = Instance.new("TextButton")
+MinimizeBtn.Size = UDim2.new(0, 32, 0, 32)
+MinimizeBtn.Position = UDim2.new(1, -74, 0, 6)
+MinimizeBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
+MinimizeBtn.Text = "-"
+MinimizeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+MinimizeBtn.Font = Enum.Font.GothamBold
+MinimizeBtn.TextSize = 16
+MinimizeBtn.Parent = TopBar
+
+local MinCorner = Instance.new("UICorner")
+MinCorner.CornerRadius = UDim.new(0, 8)
+MinCorner.Parent = MinimizeBtn
 
 -- Tombol Close (X)
 local CloseBtn = Instance.new("TextButton")
@@ -88,7 +105,45 @@ CloseBtn.MouseButton1Click:Connect(function()
     ScreenGui:Destroy()
 end)
 
--- Fungsi Dragging
+---------------------------------------------------------
+-- 2. LOGO MINIMIZE / TOGGLE BUTTON ("COOL")
+---------------------------------------------------------
+local CoolLogoBtn = Instance.new("TextButton")
+CoolLogoBtn.Name = "CoolLogoBtn"
+CoolLogoBtn.Size = UDim2.new(0, 80, 0, 40)
+CoolLogoBtn.Position = UDim2.new(0, 20, 0.5, -20)
+CoolLogoBtn.BackgroundColor3 = Color3.fromRGB(18, 18, 24)
+CoolLogoBtn.BorderSizePixel = 0
+CoolLogoBtn.Text = "COOL"
+CoolLogoBtn.TextColor3 = Color3.fromRGB(255, 140, 0)
+CoolLogoBtn.TextSize = 16
+CoolLogoBtn.Font = Enum.Font.GothamBold
+CoolLogoBtn.Visible = false -- Sembunyi awal saat GUI aktif
+CoolLogoBtn.Active = true
+CoolLogoBtn.Draggable = true -- Logo bisa digeser di layar
+CoolLogoBtn.Parent = ScreenGui
+
+local LogoCorner = Instance.new("UICorner")
+LogoCorner.CornerRadius = UDim.new(0, 10)
+LogoCorner.Parent = CoolLogoBtn
+
+local LogoStroke = Instance.new("UIStroke")
+LogoStroke.Color = Color3.fromRGB(255, 100, 0)
+LogoStroke.Thickness = 2
+LogoStroke.Parent = CoolLogoBtn
+
+-- Logika Tombol Minimize & Restore
+MinimizeBtn.MouseButton1Click:Connect(function()
+    MainFrame.Visible = false
+    CoolLogoBtn.Visible = true
+end)
+
+CoolLogoBtn.MouseButton1Click:Connect(function()
+    CoolLogoBtn.Visible = false
+    MainFrame.Visible = true
+end)
+
+-- Fungsi Dragging Jendela Utama
 local dragging, dragStart, startPos
 TopBar.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
